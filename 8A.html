@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Virtual Lab - Dairy Technology</title>
+<style>
+/* ===== RESET ===== */
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',sans-serif;}
+#lab{position:relative;width:100vw;height:100vh;overflow:hidden;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;}
+#labTitle{position:absolute;top:39%;left:46.5%;transform:translateX(-50%);color:#fff;font-weight:700;letter-spacing:2px;font-size:clamp(22px,3vw,42px);text-shadow:0 0 6px rgba(0,0,0,0.8),0 0 12px rgba(0,0,0,0.6);z-index:5;pointer-events:none;}
+#bg{position:absolute;width:100%;height:100%;object-fit:cover;z-index:0;}
+#instruction{position:absolute;top:0;width:100%;padding:12px;background:rgba(0,0,0,0.65);color:#fff;text-align:center;font-size:clamp(14px,2vw,20px);z-index:20;font-weight:bold;}
+.lab-row{position:absolute;bottom:6vh;width:95%;display:flex;justify-content:center;align-items:flex-end;gap:1.2vw;z-index:10;}
+.apparatus{position:relative;width:14vw;max-width:200px;height:28vh;display:flex;justify-content:center;align-items:flex-end;cursor:pointer;border-radius:12px;transition:0.3s ease;}
+.apparatus img{max-width:100%;max-height:100%;object-fit:contain;}
+.apparatus:hover{transform:translateY(-5px);box-shadow:0 0 15px rgba(255,255,255,0.6),0 0 25px rgba(0,180,255,0.7);background:rgba(255,255,255,0.08);}
+.apparatus::after,.tube::after{content:attr(data-name);position:absolute;bottom:-24px;left:50%;transform:translateX(-50%);background:black;color:white;padding:4px 8px;font-size:12px;border-radius:6px;opacity:0;transition:0.3s;white-space:nowrap;pointer-events:none;}
+.apparatus:hover::after,.tube:hover::after{opacity:1;}
+.apparatus.no-hover:hover{transform:none;box-shadow:none;background:transparent;transition:none !important;}
+.no-tooltip::after{display:none !important;}
+.bottle{position:relative;transform:translateY(5px) scale(1.35);z-index:10;overflow:hidden;}
+.bottle img:first-child{position:relative;z-index:11;pointer-events:auto;}
+.bottle .cap{position:absolute;width:18%;top:-6%;left:40.5%;z-index:9;pointer-events:none;}
+.stand-box{width:16vw;max-width:240px;height:22vh;position:relative;display:flex;justify-content:center;align-items:flex-end;}
+.stand{position:absolute;bottom:0;left:0;width:100%;pointer-events:none;}
+.back{z-index:1;}
+.front{z-index:8;bottom:9.7vh;left:-3%;}
+.tube{position:absolute;width:1.8vw;height:100%;min-width:22px;bottom:2vh;z-index:4;transition:0.3s ease;cursor:pointer;}
+.tube img{
+position:absolute;
+bottom:0;
+left:0;
+width:100%;
+object-fit:contain;
+}
+.tubeA{left:38%;}
+.tubeB{left:52%;}
+[data-name="Milk A"]{
+position: relative;
+transform-origin: top right;
+z-index: 30;
+}
+.tube:hover{transform:translateY(-4px);box-shadow:0 0 10px rgba(255,255,255,0.7),0 0 18px rgba(0,200,255,0.8);}
+.cylinder{width:26vw;max-width:190px;left:6%;transform:translateY(3px) scale(1.9);z-index:12;pointer-events:auto;}
+.cylinder.no-hover:hover{transform:translateY(3px) scale(1.9);box-shadow:none;background:transparent;transition:none;}
+.cylinder{
+position:relative;
+}
+
+.cylinder img{
+position:absolute;
+bottom:0;
+left:0;
+width:150px;
+object-fit:contain;
+}
+#nextBtn{position:absolute;bottom:20px;left:20px;padding:10px 20px;font-size:15px;border:none;border-radius:8px;background:#007bff;color:white;cursor:pointer;z-index:30;}
+#nextBtn:hover{background:#0056b3;}
+@media(max-width:1024px){.lab-row{gap:2vw;bottom:5vh;}.apparatus{width:18vw;height:24vh;}.tube{width:2.8vw;}}
+@media(max-width:600px){.lab-row{gap:3vw;bottom:4vh;}.apparatus{width:22vw;height:20vh;}.stand-box{width:28vw;}.tube{width:4vw;bottom:3vh;}}
+.hide-apparatus{opacity:0;transform:translateY(40px);pointer-events:none;transition:all 0.6s ease;}
+.focus{transform:scale(1.08);z-index:20;transition:transform 0.4s ease;}
+#milkStream{
+position:absolute;
+width:16px;
+height:0;
+background:white;
+opacity:0;
+border-radius:10px;
+z-index:50;
+transition:height 0.8s ease, opacity 0.3s ease;
+box-shadow:0 0 10px rgba(255,255,255,0.9);
+}/* Milk Pour Animation */
+@keyframes milkPourAnim{
+0% {transform:translate(0,0) rotate(0deg);}
+50% {transform:translate(120px,-100px) rotate(-45deg);}
+80% {transform:translate(120px,-100px) rotate(-45deg);}
+100% {transform:translate(0,0) rotate(0deg);}
+}
+.pour-animation{animation:milkPourAnim 2s forwards;}
+</style>
+</head>
+<body>
+
+<div id="lab">
+  <img src="Images/8A/bgImage.png" id="bg">
+  <div id="labTitle">Dairy Technology Lab</div>
+  <div id="instruction">Observe the apparatus setup</div>
+
+  <div class="lab-row">
+
+    <div class="apparatus" data-name="Water Bath">
+        <img src="Images/8A/water_bath_familiar.png">
+    </div>
+
+    <div class="apparatus stand-box" data-name="Test Tube Stand">
+        <img src="Images/8A/test-tube-stand-back.png" class="stand back">
+        <div class="tube tubeA" data-name="Test Tube A">
+            <img src="Images/8A/tube.png">
+            <img src="Images/8A/test-tube-milk.png" class="tube-milk hide-apparatus">
+
+        </div>
+        <div class="tube tubeB" data-name="Test Tube B">
+            <img src="Images/8A/tube.png">
+              <img src="Images/8A/test-tube-milk.png" class="tube-milk hide-apparatus">
+        </div>
+        <img src="Images/8A/test-tube-stand-front.png" class="stand front">
+    </div>
+
+    <div class="apparatus cylinder" data-name="Measuring Cylinder">
+        <img src="Images/8A/measuring-cylinder.png" class="cylinder-empty">
+        <img src="Images/8A/measuring-cylinder-milk.png" class="cylinder-milk hide-apparatus">
+    </div>
+
+    <div class="apparatus" data-name="Milk A">
+        <img src="Images/8A/MilkA.png">
+    </div>
+
+    <div class="apparatus" data-name="Milk B">
+        <img src="Images/8A/MilkB.png">
+    </div>
+
+    <div class="apparatus bottle" data-name="Iodine Bottle">
+        <img src="Images/8A/iodine-bottle.png">
+        <img src="Images/8A/iodine-cap.png" class="cap">
+    </div>
+
+  </div>
+    <div id="milkStream"></div>
+
+  <button id="nextBtn">Next ➜</button>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const nextBtn = document.getElementById("nextBtn");
+  const instruction = document.getElementById("instruction");
+
+  const lab = document.getElementById("lab");
+  const milkA = document.querySelector('[data-name="Milk A"]');
+  const cylinderEmpty = document.querySelector('.cylinder-empty');
+  const cylinderMilk = document.querySelector('.cylinder-milk');
+  const milkStream = document.getElementById('milkStream');
+
+  let step = 1;
+
+const tubeA = document.querySelector(".tubeA");
+const tubeAEmpty = tubeA.querySelector("img:first-child");
+const tubeAMilk = tubeA.querySelector(".tube-milk");
+const cylinder = document.querySelector(".cylinder");
+
+const milkB = document.querySelector('[data-name="Milk B"]');
+
+const tubeB = document.querySelector(".tubeB");
+const tubeBEmpty = tubeB.querySelector("img:first-child");
+const tubeBMilk = tubeB.querySelector(".tube-milk");
+
+  setTimeout(() => {
+    instruction.textContent = "Instruction : Click on Next button to start the experiment";
+  }, 2000);
+nextBtn.addEventListener("click", () => {
+
+if(step === 1){
+
+nextBtn.style.display = "none";
+
+const allApparatus = document.querySelectorAll(".apparatus");
+
+allApparatus.forEach(app => {
+
+app.classList.remove("focus");
+app.classList.add("no-hover");
+app.classList.add("no-tooltip");
+
+const name = app.dataset.name;
+
+if(["Milk A","Milk B","Test Tube Stand","Measuring Cylinder"].includes(name)){
+app.classList.remove("hide-apparatus");
+} 
+else{
+app.classList.add("hide-apparatus");
+}
+
+});
+
+instruction.textContent =
+"Instruction : Click on Milk Sample A to pour 5 ml into the cylinder";
+
+}
+
+else if(step === 2){
+
+nextBtn.style.display = "none";
+
+instruction.textContent =
+"Instruction : Click on Test Tube A to transfer milk";
+
+}
+
+else if(step === 3){
+
+nextBtn.style.display = "none";
+
+instruction.textContent =
+"Instruction : Click on Milk Sample B to pour 5 ml into the cylinder";
+
+}
+
+else if(step === 4){
+
+nextBtn.style.display = "none";
+
+instruction.textContent =
+"Instruction : Click on Test Tube B to transfer milk";
+
+}
+});
+milkA.addEventListener("click", () => {
+
+instruction.textContent = "Pouring Milk A...";
+
+const labRect = lab.getBoundingClientRect();
+const milkRect = milkA.getBoundingClientRect();
+const cylinderRect = cylinderEmpty.getBoundingClientRect();
+
+const deltaX = (cylinderRect.left - milkRect.left) - 5;
+const deltaY = (cylinderRect.top - milkRect.top) - 60;
+// move bottle
+milkA.style.transition = "transform 0.8s ease";
+milkA.style.transform = `translate(${deltaX}px, ${deltaY}px)`;
+
+// tilt + start pouring
+// tilt + start pouring
+setTimeout(() => {
+
+milkA.style.transform =
+`translate(${deltaX}px, ${deltaY}px) rotate(-50deg)`;
+
+// position milk stream
+milkStream.style.left =
+(cylinderRect.left + cylinderRect.width/2 - labRect.left - 8) + "px";
+
+milkStream.style.top =
+(milkRect.top - labRect.top + milkRect.height - 210) + "px";
+
+// show stream
+milkStream.style.opacity = "1";
+milkStream.style.height = "120px";
+
+},800);
+// finish pouring
+setTimeout(() => {
+
+milkStream.style.height = "0";
+milkStream.style.opacity = "0";
+
+cylinderEmpty.classList.add("hide-apparatus");
+cylinderMilk.classList.remove("hide-apparatus");
+
+milkA.style.transform = "translate(0,0) rotate(0deg)";
+
+instruction.textContent =
+"Instruction : Milk Sample A poured into cylinder.";
+
+milkA.style.pointerEvents = "none";
+
+nextBtn.style.display = "block";
+step = 2;
+},2200);
+
+});
+
+tubeA.addEventListener("click", () => {
+
+if(step !== 2) return;
+
+instruction.textContent = "Transferring milk to Test Tube A...";
+nextBtn.style.display = "none";
+
+const labRect = lab.getBoundingClientRect();
+const tubeRect = tubeA.getBoundingClientRect();
+const cylRect = cylinder.getBoundingClientRect();
+
+const moveX =
+(tubeRect.left + tubeRect.width/2) - (cylRect.left + cylRect.width/2) + 68;
+
+const moveY =
+(tubeRect.top) - cylRect.top - 260;
+// move cylinder
+cylinder.style.transition = "transform 0.8s ease";
+cylinder.style.transform =
+`translate(${moveX}px, ${moveY}px) scale(1.9)`;
+
+// tilt + pour
+setTimeout(()=>{
+
+cylinder.style.transform =
+`translate(${moveX}px, ${moveY}px) rotate(-40deg) scale(1.9)`;
+
+milkStream.style.left =
+(tubeRect.left + tubeRect.width/2 - labRect.left - 8) + "px";
+
+milkStream.style.top =
+(cylRect.top - labRect.top + 30) + "px";
+
+milkStream.style.opacity = "1";
+milkStream.style.height = "90px";
+
+},800);
+
+// finish transfer
+setTimeout(()=>{
+
+milkStream.style.height = "0";
+milkStream.style.opacity = "0";
+
+tubeAEmpty.classList.add("hide-apparatus");
+tubeAMilk.classList.remove("hide-apparatus");
+
+cylinderMilk.classList.add("hide-apparatus");
+cylinderEmpty.classList.remove("hide-apparatus");
+
+cylinder.style.transform =
+"translate(0,3px) rotate(0deg) scale(1.9)";
+
+instruction.textContent =
+"Instruction : Milk transferred to Test Tube A.";
+
+nextBtn.style.display = "block";
+
+step = 3;
+
+},2200);
+
+});
+
+milkB.addEventListener("click", () => {
+
+if(step !== 3) return;
+
+instruction.textContent = "Pouring Milk B...";
+
+const labRect = lab.getBoundingClientRect();
+const milkRect = milkB.getBoundingClientRect();
+const cylinderRect = cylinderEmpty.getBoundingClientRect();
+
+const deltaX = (cylinderRect.left - milkRect.left) + 110;
+const deltaY = (cylinderRect.top - milkRect.top) - 60;
+
+milkB.style.transition = "transform 0.8s ease";
+milkB.style.transform = `translate(${deltaX}px, ${deltaY}px)`;
+
+// tilt
+setTimeout(()=>{
+
+milkB.style.transform =
+`translate(${deltaX}px, ${deltaY}px) rotate(-50deg)`;
+
+milkStream.style.left =
+(cylinderRect.left + cylinderRect.width/2 - labRect.left - 8) + "px";
+
+milkStream.style.top =
+(milkRect.top - labRect.top + milkRect.height - 210) + "px";
+
+milkStream.style.opacity = "1";
+milkStream.style.height = "120px";
+
+},800);
+
+// finish
+setTimeout(()=>{
+
+milkStream.style.height = "0";
+milkStream.style.opacity = "0";
+
+cylinderEmpty.classList.add("hide-apparatus");
+cylinderMilk.classList.remove("hide-apparatus");
+
+milkB.style.transform = "translate(0,0) rotate(0deg)";
+
+instruction.textContent =
+"Instruction : Milk Sample B poured into cylinder.";
+
+milkB.style.pointerEvents = "none";
+
+nextBtn.style.display = "block";
+
+step = 4;
+
+},2200);
+
+});
+
+tubeB.addEventListener("click", () => {
+
+if(step !== 4) return;
+
+instruction.textContent = "Transferring milk to Test Tube B...";
+nextBtn.style.display = "none";
+
+const labRect = lab.getBoundingClientRect();
+const tubeRect = tubeB.getBoundingClientRect();
+const cylRect = cylinder.getBoundingClientRect();
+
+const moveX =
+(tubeRect.left + tubeRect.width/2) - (cylRect.left + cylRect.width/2) + 68;
+
+const moveY =
+(tubeRect.top) - cylRect.top - 260;
+
+cylinder.style.transition = "transform 0.8s ease";
+cylinder.style.transform =
+`translate(${moveX}px, ${moveY}px) scale(1.9)`;
+
+// tilt
+setTimeout(()=>{
+
+cylinder.style.transform =
+`translate(${moveX}px, ${moveY}px) rotate(-40deg) scale(1.9)`;
+
+milkStream.style.left =
+(tubeRect.left + tubeRect.width/2 - labRect.left - 8) + "px";
+
+milkStream.style.top =
+(cylRect.top - labRect.top + 30) + "px";
+
+milkStream.style.opacity = "1";
+milkStream.style.height = "90px";
+
+},800);
+
+// finish
+setTimeout(()=>{
+
+milkStream.style.height = "0";
+milkStream.style.opacity = "0";
+
+tubeBEmpty.classList.add("hide-apparatus");
+tubeBMilk.classList.remove("hide-apparatus");
+
+cylinderMilk.classList.add("hide-apparatus");
+cylinderEmpty.classList.remove("hide-apparatus");
+
+cylinder.style.transform =
+"translate(0,3px) rotate(0deg) scale(1.9)";
+
+instruction.textContent =
+"Instruction : Milk transferred to Test Tube B.";
+
+step = 5;
+
+},2200);
+
+});
+
+});
+</script>
+
+</body>
+</html>
