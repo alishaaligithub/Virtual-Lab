@@ -1,0 +1,733 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dairy Technology Virtual Lab</title>
+
+<style>
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:Segoe UI, sans-serif;
+}
+
+html,body{
+width:100%;
+height:100%;
+overflow:hidden;
+}
+
+/* LAB AREA */
+
+#lab{
+position:relative;
+width:100vw;
+height:100vh;
+overflow:hidden;
+}
+
+/* BACKGROUND */
+
+#bg{
+position:absolute;
+top:0;
+left:0;
+width:100%;
+height:100%;
+object-fit:cover;
+z-index:0;
+}
+
+/* TITLE */
+
+#labTitle{
+position:absolute;
+top:40%;
+left:46%;
+transform:translateX(-50%);
+color:white;
+font-size:3vw;
+font-weight:bold;
+text-shadow:0 0 8px black;
+z-index:5;
+}
+
+/* INSTRUCTION BAR */
+
+#instruction{
+position:absolute;
+top:0;
+width:100%;
+padding:12px;
+background:rgba(0,0,0,0.6);
+color:white;
+text-align:center;
+font-size:18px;
+z-index:20;
+}
+
+/* APPARATUS ROW */
+
+.lab-row{
+position:absolute;
+bottom:6vh;
+width:100%;
+display:flex;
+justify-content:center;
+align-items:flex-end;
+gap:3vw;
+z-index:10;
+}
+
+/* APPARATUS */
+
+.apparatus{
+width:14vw;
+max-width:200px;
+height:26vh;
+display:flex;
+align-items:flex-end;
+justify-content:center;
+position:relative;
+}
+
+.apparatus img{
+max-width:100%;
+max-height:100%;
+object-fit:contain;
+}
+
+/* TOOLTIP */
+
+.apparatus::after,
+.tube::after,
+#pipette::after{
+content:attr(data-name);
+position:absolute;
+bottom:-24px;
+left:50%;
+transform:translateX(-50%);
+background:black;
+color:white;
+padding:4px 8px;
+font-size:12px;
+border-radius:6px;
+opacity:0;
+transition:0.3s;
+white-space:nowrap;
+}
+
+.apparatus:hover::after,
+.tube:hover::after,
+#pipette:hover::after{
+opacity:1;
+}
+
+/* TEST TUBE STAND */
+
+.stand-box{
+width:16vw;
+max-width:240px;
+height:22vh;
+position:relative;
+}
+
+.stand{
+position:absolute;
+bottom:0;
+width:100%;
+}
+
+.front{
+z-index:8;
+bottom:9.7vh;
+left:-3%;
+}
+
+/* TEST TUBES */
+
+.tube{
+position:absolute;
+width:1.8vw;
+min-width:22px;
+bottom:2vh;
+}
+
+.tube img{
+width:100%;
+}
+
+.tubeA{ left:38%; }
+.tubeB{ left:52%; }
+
+/* BOTTLE */
+
+.bottle{
+transform:scale(1.2);
+}
+
+/* PIPETTE (SMALLER SIZE) */
+
+#pipette{
+position:absolute;
+bottom:8vh;
+left:8vw;
+width:7vw;
+max-width:110px;
+transform:rotate(-90deg);
+transition:all 1.2s ease;
+z-index:100;
+cursor:pointer;
+}
+
+#pipette img{
+width:40%;
+height:250px;
+filter:drop-shadow(0 4px 8px rgba(0,0,0,0.5));
+}
+
+/* NEXT BUTTON */
+
+#nextBtn{
+position:absolute;
+bottom:20px;
+right:20px;
+padding:10px 20px;
+font-size:16px;
+border:none;
+border-radius:8px;
+background:#235d3f;
+color:white;
+cursor:pointer;
+z-index:30;
+display:none;
+
+}
+
+#milkDrop{
+position:absolute;
+width:8px;
+height:12px;
+background:white;
+border-radius:50%;
+left:24.5vw;
+bottom:40vh;
+opacity:0;
+z-index:120;
+}
+
+.dropAnimation{
+animation:dropMilk 0.5s ease forwards;
+}
+
+@keyframes dropMilk{
+0%{bottom:30vh; opacity:1;}
+100%{bottom:24vh; opacity:0;}
+}
+
+.dmabBottleImg{
+width:100%;
+}
+
+.dmabCap{
+position:absolute;
+top:11%;left:50%;
+transform:translateX(-50%);
+width:27%;
+z-index:20;
+}
+
+</style>
+</head>
+
+<body>
+
+<div id="lab">
+
+<img src="Images/8A/bgImage.png" id="bg">
+
+<div id="labTitle">Dairy Technology Lab</div>
+
+<div id="instruction">
+Instruction:- Observe the apparatus setup
+</div>
+
+<div class="lab-row">
+
+<div class="apparatus stand-box" data-name="Test Tube Stand">
+
+<img src="Images/8B/test-tube-stand-back.png" class="stand">
+
+<div class="tube tubeA" data-name="Test Tube A">
+<img id="tubeAImg" src="Images/8A/tube.png">
+</div>
+
+<div class="tube tubeB" data-name="Test Tube B">
+<img src="Images/8A/tube.png">
+</div>
+
+<img src="Images/8B/test-tube-stand-front.png" class="stand front">
+
+</div>
+
+<div class="apparatus" id="milkA" data-name="Milk A">
+<img src="Images/8A/MilkA.png">
+</div>
+
+<div class="apparatus" id="milkB" data-name="Milk B">
+<img src="Images/8A/MilkB.png">
+</div>
+
+<div class="apparatus bottle" id="dmabBottle" data-name="DMAB Bottle">
+<img src="Images/8B/DMAB-Bottle.png">
+
+<img src="Images/8B/DMAB-Bottle-cap.png" class="dmabCap" id="dmabCap"></div>
+
+</div>
+
+<!-- PIPETTE -->
+
+<div id="pipette" data-name="Pippete">
+<img src="Images/8B/pipette.png">
+</div>
+<div id="milkDrop"></div>
+<button id="nextBtn">Next ➜</button>
+
+</div>
+
+<script>
+
+  
+
+
+const nextBtn=document.getElementById("nextBtn");
+const instruction=document.getElementById("instruction");
+const pipette=document.getElementById("pipette");
+const dmabBottle=document.getElementById("dmabBottle");
+const tubeA=document.getElementById("tubeAImg");
+const tubeB=document.querySelector(".tubeB img");
+const milkDrop=document.getElementById("milkDrop");
+const milkA=document.getElementById("milkA");
+const milkB=document.getElementById("milkB");
+const dmabCap=document.getElementById("dmabCap");
+
+  let step = -1;
+
+setTimeout(()=>{
+nextBtn.style.display="block";
+},2000);
+
+/* NEXT BUTTON */
+
+
+nextBtn.onclick=function(){
+
+if(step===-1){
+instruction.innerText="Instruction:- Click on pipette to take 1 ml milk from Milk Sample A";
+nextBtn.style.display="none";
+step=0;
+}
+
+else if(step===1){
+instruction.innerText="Instruction:- Click on pipette again to add milk to Test Tube A";
+nextBtn.style.display="none";
+}
+
+else if(step===2){
+instruction.innerText="Instruction:- Click on pipette to take 1 ml milk from Milk B";
+nextBtn.style.display="none";
+}
+
+else if(step===3){
+instruction.innerText="Instruction:- Click on pipette again to add milk to Test Tube B";
+nextBtn.style.display="none";
+}
+
+else if(step===4){
+
+milkA.style.display="none";
+milkB.style.display="none";
+
+instruction.innerText="Instruction:- Click on DMAB bottle cap to open it";
+nextBtn.style.display="none";
+
+}
+
+else if(step===5){
+
+instruction.innerText="Instruction:- Click on pipette to take DMAB reagent";
+nextBtn.style.display="none";
+
+}
+
+else if(step===6){
+
+instruction.innerText="Instruction:- Click on pipette to add 1 ml of 1.6% DMAB reagent to both test tubes";
+nextBtn.style.display="none";
+
+}
+
+}
+/* PIPETTE CLICK */
+
+pipette.onclick=function(){
+
+/* FIRST ACTION : TAKE MILK */
+
+if(step===0){
+
+instruction.innerText="Instruction:- Taking 1 ml milk from Milk A";
+
+pipette.style.bottom="40vh";
+pipette.style.left="28vw";
+pipette.style.transform="rotate(-20deg)";
+
+setTimeout(()=>{
+pipette.style.left="43vw";
+pipette.style.bottom="48vh";
+pipette.style.transform="rotate(0deg)";
+},1200);
+
+setTimeout(()=>{
+pipette.style.bottom="20vh";
+},2200);
+
+setTimeout(()=>{
+pipette.querySelector("img").src="Images/8B/pipette-milk-1ml.png";
+instruction.innerText="Instruction:- Milk taken";
+},3400);
+
+setTimeout(()=>{
+pipette.style.bottom="40vh";
+},3800);
+
+setTimeout(()=>{
+pipette.style.left="55vw";
+pipette.style.bottom="42vh";
+},4600);
+
+/* show next */
+
+setTimeout(()=>{
+nextBtn.style.display="block";
+instruction.innerText="Instruction:- Click Next";
+step=1;
+},5200);
+
+}
+
+/* SECOND ACTION : ADD MILK */
+
+else if(step===1){
+
+instruction.innerText="Instruction:- Adding milk to Test Tube A";
+
+/* move to test tube */
+
+pipette.style.left="23.5vw";
+pipette.style.bottom="40vh";
+
+setTimeout(()=>{
+pipette.style.bottom="28vh";
+},1200);
+
+/* milk drop */
+
+setTimeout(()=>{
+milkDrop.classList.add("dropAnimation");
+},4000);
+
+/* change tube image */
+
+setTimeout(()=>{
+tubeA.src="Images/8B/test-tube-1ml-milk.png";
+instruction.innerText="Instruction:- Milk added to Test Tube A";
+},4000);
+
+/* change pipette back to empty */
+setTimeout(()=>{
+pipette.querySelector("img").src="Images/8B/pipette.png";
+},4000);
+
+/* move pipette back to original position */
+setTimeout(()=>{
+pipette.style.left="8vw";
+pipette.style.bottom="8vh";
+pipette.style.transform="rotate(-90deg)";
+},4200);
+
+/* show next button */
+setTimeout(()=>{
+instruction.innerText="Click Next";
+nextBtn.style.display="block";
+step=2;
+},4500);
+
+}
+
+/* THIRD ACTION : TAKE MILK FROM MILK B */
+
+else if(step===2){
+
+instruction.innerText="Instruction:- Taking 1 ml milk from Milk B";
+
+pipette.style.bottom="40vh";
+pipette.style.left="56vw";
+pipette.style.transform="rotate(-20deg)";
+
+setTimeout(()=>{
+pipette.style.left="58vw";
+pipette.style.bottom="48vh";
+pipette.style.transform="rotate(0deg)";
+},1200);
+
+setTimeout(()=>{
+pipette.style.bottom="20vh";
+},2200);
+
+setTimeout(()=>{
+pipette.querySelector("img").src="Images/8B/pipette-milk-1ml.png";
+instruction.innerText="Instruction:- Milk taken from Milk B";
+},3400);
+
+setTimeout(()=>{
+pipette.style.bottom="40vh";
+},3800);
+
+setTimeout(()=>{
+pipette.style.left="55vw";
+pipette.style.bottom="42vh";
+},4600);
+
+setTimeout(()=>{
+nextBtn.style.display="block";
+instruction.innerText="Instruction:- Click Next";
+step=3;
+},5200);
+
+}
+
+/* FOURTH ACTION : ADD MILK TO TEST TUBE B */
+
+else if(step===3){
+
+instruction.innerText="Instruction:- Adding milk to Test Tube B";
+
+pipette.style.left="26vw";
+pipette.style.bottom="40vh";
+
+setTimeout(()=>{
+pipette.style.bottom="28vh";
+},1200);
+
+setTimeout(()=>{
+    /* move drop under pipette for Milk B */
+milkDrop.style.left="27vw";
+milkDrop.style.bottom="30vh";
+
+milkDrop.classList.remove("dropAnimation");
+void milkDrop.offsetWidth;
+milkDrop.classList.add("dropAnimation");
+},2000);
+
+setTimeout(()=>{
+tubeB.src="Images/8B/test-tube-1ml-milk.png";
+instruction.innerText="Instruction:- Milk added to Test Tube B";
+},2200);
+
+setTimeout(()=>{
+pipette.querySelector("img").src="Images/8B/pipette.png";
+},2500);
+
+setTimeout(()=>{
+pipette.style.left="8vw";
+pipette.style.bottom="8vh";
+pipette.style.transform="rotate(-90deg)";
+},3000);
+
+setTimeout(()=>{
+instruction.innerText="Instruction:- Click Next";
+nextBtn.style.display="block";
+step=4;
+},3500);
+
+}
+
+/* FIFTH ACTION : TAKE DMAB */
+
+else if(step===5){
+
+instruction.innerText="Instruction:-Taking DMAB reagent";
+
+pipette.style.bottom="40vh";
+pipette.style.left="55vw";
+pipette.style.transform="rotate(-20deg)";
+
+/* move above bottle */
+
+setTimeout(()=>{
+pipette.style.left="58vw";
+pipette.style.bottom="48vh";
+pipette.style.transform="rotate(0deg)";
+},1200);
+
+/* move down into bottle */
+
+setTimeout(()=>{
+pipette.style.bottom="22vh";
+},2200);
+
+/* change pipette image */
+
+setTimeout(()=>{
+pipette.querySelector("img").src="Images/8B/pipette-dmab-1ml.png";
+instruction.innerText="Instruction:- DMAB reagent taken";
+},3400);
+
+/* move up */
+
+setTimeout(()=>{
+pipette.style.bottom="40vh";
+},3800);
+
+/* move slightly aside */
+
+setTimeout(()=>{
+pipette.style.left="60vw";
+pipette.style.bottom="42vh";
+},4600);
+
+/* show next */
+
+setTimeout(()=>{
+instruction.innerText="Click Next";
+nextBtn.style.display="block";
+step=6;
+},5200);
+
+}
+
+/* SIXTH ACTION : ADD DMAB TO BOTH TEST TUBES */
+
+else if(step===6){
+
+instruction.innerText="Instruction:- Adding DMAB reagent to Test Tube A";
+
+/* move to test tube A */
+
+pipette.style.left="39.5vw";
+pipette.style.bottom="40vh";
+
+setTimeout(()=>{
+pipette.style.bottom="28vh";
+},1200);
+
+/* drop in tube A */
+
+setTimeout(()=>{
+
+milkDrop.style.left="41vw";
+milkDrop.style.bottom="30vh";
+milkDrop.style.background="orange";
+milkDrop.classList.remove("dropAnimation");
+void milkDrop.offsetWidth;
+milkDrop.classList.add("dropAnimation");
+
+},2000);
+
+/* move to test tube B */
+
+setTimeout(()=>{
+
+instruction.innerText="Instruction:- Adding DMAB reagent to Test Tube B";
+
+pipette.style.left="42vw";
+pipette.style.bottom="40vh";
+
+},3200);
+
+setTimeout(()=>{
+pipette.style.bottom="28vh";
+},4200);
+
+/* drop in tube B */
+
+setTimeout(()=>{
+
+milkDrop.style.left="43vw";
+milkDrop.style.bottom="30vh";
+
+milkDrop.style.background="orange";
+milkDrop.classList.remove("dropAnimation");
+void milkDrop.offsetWidth;
+milkDrop.classList.add("dropAnimation");
+
+},5200);
+
+/* change pipette image back */
+
+setTimeout(()=>{
+pipette.querySelector("img").src="Images/8B/pipette.png";
+},6000);
+
+/* move pipette to original position */
+
+setTimeout(()=>{
+pipette.style.left="8vw";
+pipette.style.bottom="8vh";
+pipette.style.transform="rotate(-90deg)";
+},6500);
+
+/* experiment complete */
+
+setTimeout(()=>{
+
+/* change test tube images */
+
+tubeA.src="Images/8B/test-tube-distinct-yellow.png";
+tubeB.src="Images/8B/test-tube-light-yellow.png";
+
+instruction.innerText="Instruction:- DMAB reagent added to both test tubes. Observe the colour change";
+instruction.innerText="Instruction:- Test Tube A shows distinct yellow colour and Test Tube B shows light yellow colour ";
+
+nextBtn.style.display="block";
+step=7;
+
+},7000);
+}
+}
+dmabCap.onclick=function(){
+
+if(step===4){
+
+instruction.innerText="Instruction:- Opening DMAB bottle";
+
+dmabCap.style.transition="all 1s ease";
+
+/* cap move right */
+dmabCap.style.left="90%";
+
+/* cap move down */
+dmabCap.style.top="45%";
+
+setTimeout(()=>{
+instruction.innerText="Instruction:- DMAB bottle opened";
+nextBtn.style.display="block";
+step=5;
+},1200);
+
+}
+
+}
+
+
+
+
+</script>
+
+</body>
+</html>

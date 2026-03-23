@@ -1,0 +1,847 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dairy Technology Virtual Lab</title>
+
+<style>
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:Segoe UI, sans-serif;
+}
+
+html,body{
+width:100%;
+height:100%;
+overflow:hidden;
+}
+
+#lab{
+position:relative;
+width:100vw;
+height:100vh;
+overflow:hidden;
+}
+
+/* BACKGROUND */
+
+#bg{
+position:absolute;
+top:0;
+left:0;
+width:100%;
+height:100%;
+object-fit:cover;
+z-index:0;
+}
+
+/* TITLE */
+
+#labTitle{
+position:absolute;
+top:40%;
+left:50%;
+transform:translateX(-50%);
+color:white;
+font-size:3vw;
+font-weight:bold;
+text-shadow:0 0 8px black;
+z-index:5;
+}
+
+/* INSTRUCTION */
+
+#instruction{
+position:absolute;
+top:0;
+width:100%;
+padding:12px;
+background:rgba(0,0,0,0.6);
+color:white;
+text-align:center;
+font-size:18px;
+z-index:20;
+}
+
+/* APPARATUS ROW */
+
+.lab-row{
+position:absolute;
+bottom:6vh;
+width:100%;
+display:flex;
+justify-content:center;
+align-items:flex-end;
+gap:1.5vw;
+z-index:10;
+}
+
+/* APPARATUS */
+
+.apparatus{
+width:9vw;
+max-width:140px;
+height:24vh;
+display:flex;
+align-items:flex-end;
+justify-content:center;
+position:relative;
+cursor:pointer;
+}
+
+.apparatus img{
+max-width:100%;
+max-height:100%;
+object-fit:contain;
+display:block;
+}
+
+/* TOOLTIP */
+
+.apparatus::after,
+.tube::after,
+#pipette::after{
+content:attr(data-name);
+position:absolute;
+top:110%;
+left:50%;
+transform:translateX(-50%);
+background:#111;
+color:white;
+padding:5px 10px;
+font-size:12px;
+border-radius:6px;
+opacity:0;
+transition:0.2s;
+white-space:nowrap;
+pointer-events:none;
+z-index:500;
+}
+
+.apparatus:hover::after,
+.tube:hover::after,
+#pipette:hover::after{
+opacity:1;
+}
+
+/* TEST TUBE STAND */
+
+.stand-box{
+width:16vw;
+max-width:220px;
+height:24vh;
+position:relative;
+}
+
+.stand{
+position:absolute;
+bottom:0;
+width:100%;
+}
+
+.front{
+z-index:10;
+bottom:70px;
+left:-7px;
+}
+
+/* TEST TUBES */
+
+.tube{
+position:absolute;
+width:20px;
+bottom:18px;
+cursor:pointer;
+z-index:5;
+}
+
+.tubeA{ left:40%; }
+.tubeB{ left:55%; }
+
+.tube img{
+width:100%;
+}
+
+/* HEIGHT */
+
+#milkA img,
+#milkB img{
+height:20vh;
+}
+
+#chloroformBottle img,
+#methyleneBottle img{
+height:21vh;
+}
+
+/* CAPS */
+
+.chloroCap{
+position:absolute;
+top:-19px;
+left:50%;
+transform:translateX(-50%);
+width:32%;
+}
+
+.methyleneCap{
+position:absolute;
+top:-15px;
+left:50%;
+transform:translateX(-50%);
+width:32%;
+z-index:-2;
+transition:all 0.8s ease;
+}
+
+/* PIPETTE */
+
+#pipette{
+position:absolute;
+bottom:8vh;
+left:8vw;
+width:7vw;
+max-width:110px;
+transform:rotate(-90deg);
+transition:all 1.2s ease;
+z-index:100;
+cursor:pointer;
+}
+
+#pipette img{
+width:40%;
+height:250px;
+filter:drop-shadow(0 4px 8px rgba(0,0,0,0.5));
+}
+
+/* NEXT BUTTON */
+
+#nextBtn{
+position:absolute;
+bottom:20px;
+right:20px;
+padding:10px 20px;
+font-size:16px;
+border:none;
+border-radius:8px;
+background:#235d3f;
+color:white;
+cursor:pointer;
+z-index:30;
+display:none;
+}
+
+/* DROP */
+
+#milkDrop{
+position:absolute;
+width:8px;
+height:12px;
+background:white;
+border-radius:50%;
+left:22.9vw;
+bottom:40vh;
+opacity:0;
+z-index:120;
+}
+
+.dropAnimation{
+animation:dropMilk 0.5s ease forwards;
+}
+
+@keyframes dropMilk{
+0%{bottom:30vh;opacity:1;}
+100%{bottom:24vh;opacity:0;}
+}
+
+</style>
+</head>
+
+<body>
+
+<div id="lab">
+
+<img src="Images/8A/bgImage.png" id="bg">
+
+<div id="labTitle">Dairy Technology Lab</div>
+
+<div id="instruction">
+Instruction:- Observe the apparatus setup
+</div>
+
+<div class="lab-row">
+
+<div class="apparatus stand-box" data-name="Test Tube Stand">
+
+<img src="Images/8C/test-tube-stand-back.png" class="stand">
+
+<div class="tube tubeA" data-name="Test Tube A">
+<img id="tubeAImg" src="Images/8C/test-tube.png">
+</div>
+
+<div class="tube tubeB" data-name="Test Tube B">
+<img id="tubeBImg" src="Images/8C/test-tube.png">
+</div>
+
+<img src="Images/8C/test-tube-stand-front.png" class="stand front">
+
+</div>
+
+<div class="apparatus" id="milkA" data-name="Milk Sample A">
+<img src="Images/8C/milk.png">
+</div>
+
+<div class="apparatus" id="milkB" data-name="Milk Sample B">
+<img src="Images/8C/MilkB.png">
+</div>
+
+<div class="apparatus" id="chloroformBottle" data-name="Chloroform Bottle">
+<img src="Images/8C/chloroform-bottle.png">
+<img src="Images/8C/chloroform-cap.png" class="chloroCap">
+</div>
+
+<div class="apparatus" id="methyleneBottle" data-name="Methylene Blue Bottle">
+<img src="Images/8C/methylene-blue.png">
+<img src="Images/8C/methylene-cap.png" class="methyleneCap">
+</div>
+
+<div class="apparatus" id="centrifuge" data-name="Centrifuge">
+<img src="Images/8C/centrifuge_familiar.png">
+</div>
+
+</div>
+
+<!-- PIPETTE -->
+
+<div id="pipette" data-name="Pipette">
+<img id="pipetteImg" src="Images/8C/pipette.png">
+</div>
+
+<div id="milkDrop"></div>
+
+<button id="nextBtn">Next ➜</button>
+
+</div>
+<script>
+
+const nextBtn=document.getElementById("nextBtn");
+const instruction=document.getElementById("instruction");
+const pipette=document.getElementById("pipette");
+const pipetteImg=document.getElementById("pipetteImg");
+const milkDrop=document.getElementById("milkDrop");
+const tubeA=document.getElementById("tubeAImg");
+const tubeB=document.getElementById("tubeBImg");
+
+const methyleneBottle=document.getElementById("methyleneBottle");
+const methyleneCap=document.querySelector(".methyleneCap");
+const chloroCap=document.querySelector(".chloroCap");
+
+let step=-1;
+let methyleneStep=0;
+
+/* SHOW FIRST NEXT */
+
+setTimeout(()=>{
+nextBtn.style.display="block";
+},2000);
+
+/* NEXT BUTTON */
+
+nextBtn.onclick=function(){
+
+if(step===-1){
+instruction.innerText="Instruction:- Click pipette to take milk from Sample A";
+nextBtn.style.display="none";
+step=0;
+}
+
+else if(step===1){
+instruction.innerText="Instruction:- Click pipette to add milk to Test Tube A";
+nextBtn.style.display="none";
+}
+
+else if(step===2){
+instruction.innerText="Instruction:- Click pipette to take milk from Sample B";
+nextBtn.style.display="none";
+}
+
+else if(step===3){
+instruction.innerText="Instruction:- Click pipette to add milk to Test Tube B";
+nextBtn.style.display="none";
+}
+
+else if(step===4){
+instruction.innerText="Instruction:- Click Methylene Blue bottle";
+nextBtn.style.display="none";
+step=5;
+}
+
+else if(step===6){
+instruction.innerText="Instruction:- Click chloroform bottle cap to open";
+nextBtn.style.display="none";
+}
+
+else if(step===7){
+instruction.innerText="Instruction:- Click pipette to take chloroform from bottle";
+nextBtn.style.display="none";
+step=8;
+}
+else if(step===9){
+instruction.innerText="Instruction:- Click pipette to add chloroform to both Test Tubes";
+nextBtn.style.display="none";
+step=10;
+}
+
+  else if (step === 11) {
+    instruction.innerText = "Placing test tubes in centrifuge...";
+
+    // Hide unused apparatus
+    milkA.style.display = "none";
+    milkB.style.display = "none";
+    chloroformBottle.style.display = "none";
+    methyleneBottle.style.display = "none";
+    pipette.style.display = "none";
+
+    // Show centrifuge familiar image
+    const centrifugeImg = centrifuge.querySelector("img");
+    centrifugeImg.src = "Images/8C/centrifuge_familiar.png";
+
+    nextBtn.style.display = "none";
+
+    // Animate lid close
+    setTimeout(() => {
+      centrifugeImg.src = "Images/8C/centrifuge_upper_lid_close.png";
+      instruction.innerText = "Centrifuge lid closed";
+    }, 1000);
+
+    // Animate lid downward open
+    setTimeout(() => {
+      centrifugeImg.src = "Images/8C/centrifuge_downward_open.png";
+      instruction.innerText = "Centrifuge ready";
+      nextBtn.style.display = "block"; // ready for next step
+    }, 2500);
+
+    step = 12;
+  }
+}
+
+
+
+
+/* PIPETTE CLICK */
+
+pipette.onclick=function(){
+
+/* TAKE MILK A */
+
+if(step===0){
+
+instruction.innerText="Taking milk from Milk Sample A";
+
+pipette.style.left="36vw";
+pipette.style.bottom="40vh";
+pipette.style.transform="rotate(-20deg)";
+
+setTimeout(()=>{
+pipette.style.bottom="16vh";
+pipette.style.transform="rotate(0deg)";
+},1200);
+
+setTimeout(()=>{
+pipetteImg.src="Images/8B/pipette-milk-1ml.png";
+},2200);
+
+setTimeout(()=>{
+pipette.style.bottom="39vh";
+},3000);
+
+setTimeout(()=>{
+pipette.style.left="37vw";
+pipette.style.bottom="45vh";
+},3600);
+
+setTimeout(()=>{
+instruction.innerText="Click Next";
+nextBtn.style.display="block";
+step=1;
+},4200);
+
+}
+
+/* ADD MILK A */
+
+else if(step===1){
+
+instruction.innerText="Adding milk to Test Tube A";
+
+pipette.style.left="22vw";
+pipette.style.bottom="40vh";
+
+setTimeout(()=>{
+pipette.style.bottom="28vh";
+},1200);
+
+setTimeout(()=>{
+
+milkDrop.style.left="23vw";
+milkDrop.style.bottom="30vh";
+milkDrop.style.background="white";
+
+milkDrop.classList.remove("dropAnimation");
+void milkDrop.offsetWidth;
+milkDrop.classList.add("dropAnimation");
+
+},2000);
+
+setTimeout(()=>{
+tubeA.src="Images/8B/test-tube-1ml-milk.png";
+},2300);
+
+setTimeout(()=>{
+pipetteImg.src="Images/8C/pipette.png";
+},2600);
+
+setTimeout(()=>{
+pipette.style.left="8vw";
+pipette.style.bottom="8vh";
+pipette.style.transform="rotate(-90deg)";
+},3200);
+
+setTimeout(()=>{
+instruction.innerText="Click Next";
+nextBtn.style.display="block";
+step=2;
+},3800);
+
+}
+
+/* TAKE MILK B */
+
+else if(step===2){
+
+instruction.innerText="Taking milk from Milk Sample B";
+
+pipette.style.left="45vw";
+pipette.style.bottom="40vh";
+pipette.style.transform="rotate(-20deg)";
+
+setTimeout(()=>{
+pipette.style.bottom="16vh";
+pipette.style.transform="rotate(0deg)";
+},1200);
+
+setTimeout(()=>{
+pipetteImg.src="Images/8B/pipette-milk-1ml.png";
+},2200);
+
+setTimeout(()=>{
+pipette.style.bottom="40vh";
+},3000);
+
+setTimeout(()=>{
+pipette.style.left="49vw";
+pipette.style.bottom="45vh";
+},3600);
+
+setTimeout(()=>{
+instruction.innerText="Click Next";
+nextBtn.style.display="block";
+step=3;
+},4200);
+
+}
+
+/* ADD MILK B */
+
+else if(step===3){
+
+instruction.innerText="Adding milk to Test Tube B";
+
+pipette.style.left="23.5vw";
+pipette.style.bottom="40vh";
+
+setTimeout(()=>{
+pipette.style.bottom="26vh";
+},1200);
+
+setTimeout(()=>{
+
+milkDrop.style.left="25vw";
+milkDrop.style.bottom="30vh";
+milkDrop.style.background="white";
+
+milkDrop.classList.remove("dropAnimation");
+void milkDrop.offsetWidth;
+milkDrop.classList.add("dropAnimation");
+
+},2000);
+
+setTimeout(()=>{
+tubeB.src="Images/8B/test-tube-1ml-milk.png";
+},2300);
+
+setTimeout(()=>{
+pipetteImg.src="Images/8C/pipette.png";
+},2600);
+
+setTimeout(()=>{
+pipette.style.left="8vw";
+pipette.style.bottom="8vh";
+pipette.style.transform="rotate(-90deg)";
+},3200);
+
+setTimeout(()=>{
+instruction.innerText="Click Next";
+nextBtn.style.display="block";
+step=4;
+},3800);
+
+}
+
+/* TAKE CHLOROFORM */
+else if(step===8){
+
+instruction.innerText="Taking chloroform from bottle";
+
+/* move right */
+
+pipette.style.left="56.5vw";
+pipette.style.bottom="30vh";
+pipette.style.transform="rotate(-20deg)";
+
+/* move down */
+/* move down deeper */
+setTimeout(()=>{
+pipette.style.bottom="17vh";
+pipette.style.transform="rotate(0deg)";
+},1200);
+
+setTimeout(()=>{
+pipette.style.bottom="15vh";
+},1700);
+
+setTimeout(()=>{
+pipette.style.bottom="17vh";  // 👈 thoda upar wapas (liquid suck effect)
+},2200);
+/* change pipette image */
+
+setTimeout(()=>{
+pipetteImg.src="Images/8B/pipette-milk-1ml.png";
+instruction.innerText="Chloroform taken in pipette";
+},2200);
+
+/* show next */
+
+setTimeout(()=>{
+instruction.innerText="Click Next";
+nextBtn.style.display="block";
+step=9;
+},3200);
+
+}
+/* ADD CHLOROFORM TO TUBES */
+
+else if(step===10){
+
+instruction.innerText="Adding chloroform to Test Tube A";
+
+/* move near tube A */
+
+pipette.style.left="22vw";
+pipette.style.bottom="40vh";
+pipette.style.transform="rotate(-20deg)";
+
+setTimeout(()=>{
+pipette.style.bottom="27.5vh";
+pipette.style.transform="rotate(0deg)";
+},1200);
+
+/* drop animation A */
+
+setTimeout(()=>{
+
+milkDrop.style.left="23vw";
+milkDrop.style.bottom="30vh";
+milkDrop.style.background="#d8d8d8";
+
+milkDrop.classList.remove("dropAnimation");
+void milkDrop.offsetWidth;
+milkDrop.classList.add("dropAnimation");
+
+},2000);
+
+/* tube A change */
+
+setTimeout(()=>{
+tubeA.src="Images/8C/test-tube-milk.png";
+pipetteImg.src="Images/8C/pipette-milk-1ml.png";
+},2300);
+
+/* move to tube B */
+
+setTimeout(()=>{
+instruction.innerText="Adding chloroform to Test Tube B";
+pipette.style.left="23.5vw";
+pipette.style.bottom="40vh";
+pipette.style.transform="rotate(-20deg)";
+},3000);
+
+setTimeout(()=>{
+pipette.style.bottom="28vh";
+pipette.style.transform="rotate(0deg)";
+},4200);
+
+/* drop animation B */
+
+setTimeout(()=>{
+
+milkDrop.style.left="25vw";
+milkDrop.style.bottom="30vh";
+milkDrop.style.background="#d8d8d8";
+
+milkDrop.classList.remove("dropAnimation");
+void milkDrop.offsetWidth;
+milkDrop.classList.add("dropAnimation");
+
+},5000);
+
+/* tube B change */
+
+setTimeout(()=>{
+tubeB.src="Images/8C/test-tube-milk.png";
+pipetteImg.src="Images/8B/pipette.png";
+},5300);
+
+/* return pipette */
+
+setTimeout(()=>{
+pipette.style.left="8vw";
+pipette.style.bottom="8vh";
+pipette.style.transform="rotate(-90deg)";
+},6000);
+
+setTimeout(()=>{
+instruction.innerText="Chloroform added successfully";
+nextBtn.style.display="block";
+step=11;
+},6800);
+
+}
+}
+/* METHYLENE BLUE */
+
+methyleneBottle.onclick=function(){
+
+if(step===5 && methyleneStep===0){
+
+instruction.innerText="Opening Methylene Blue Bottle";
+
+methyleneCap.style.top="-120px";
+
+setTimeout(()=>{
+instruction.innerText="Adding Methylene Blue to Test Tube A";
+methyleneCap.style.left="-41vw";
+methyleneCap.style.top="-150px";
+},1200);
+
+setTimeout(()=>{
+methyleneCap.style.top="-150px";
+},2200);
+
+setTimeout(()=>{
+
+milkDrop.style.left="23vw";
+milkDrop.style.bottom="20vh";
+milkDrop.style.background="#1e90ff";
+
+milkDrop.classList.remove("dropAnimation");
+void milkDrop.offsetWidth;
+milkDrop.classList.add("dropAnimation");
+
+},3000);
+
+setTimeout(()=>{
+instruction.innerText="Adding Methylene Blue to Test Tube B";
+methyleneCap.style.left="-39vw";
+methyleneCap.style.top="-150px";
+},4200);
+
+setTimeout(()=>{
+methyleneCap.style.top="-150px";
+},5200);
+
+setTimeout(()=>{
+
+milkDrop.style.left="25vw";
+milkDrop.style.bottom="20vh";
+milkDrop.style.background="#1e90ff";
+
+milkDrop.classList.remove("dropAnimation");
+void milkDrop.offsetWidth;
+milkDrop.classList.add("dropAnimation");
+
+},6000);
+
+setTimeout(()=>{
+instruction.innerText="Click cap to close bottle";
+methyleneStep=1;
+},6800);
+
+}
+
+/* CLOSE CAP */
+
+else if(methyleneStep===1){
+
+instruction.innerText="Closing Methylene Blue Bottle";
+
+methyleneCap.style.left="50%";
+methyleneCap.style.top="-120px";
+
+setTimeout(()=>{
+methyleneCap.style.top="-15px";
+},1000);
+
+setTimeout(()=>{
+instruction.innerText="Click Next";
+nextBtn.style.display="block";
+step=6;
+},2000);
+
+}
+
+}
+
+/* CHLOROFORM CAP */
+chloroCap.onclick=function(){
+
+if(step===6){
+
+instruction.innerText="Opening Chloroform Bottle";
+
+/* move cap right */
+chloroCap.style.left="80%";
+
+/* move down */
+setTimeout(()=>{
+chloroCap.style.top="40px";
+},1200);
+
+/* show next button */
+setTimeout(()=>{
+instruction.innerText="Click Next";
+nextBtn.style.display="block";
+step=7;
+},2200);
+
+}
+
+}
+
+</script>
+</body>
+</html>
